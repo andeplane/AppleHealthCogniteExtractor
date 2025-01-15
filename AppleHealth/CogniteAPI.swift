@@ -20,10 +20,10 @@ struct CogniteConfig {
         return UserDefaults.standard.string(forKey: "cdf_clientID") ?? "d2d8009c-6c86-4dee-8633-588ec4f07027"
     }
     
-    static var clientSecret: String {
+    static var clientSecret: String? {
         guard let data = KeychainHelper.standard.read(service: "com.cognite.CDF", account: "clientSecret"),
               let secret = String(data: data, encoding: .utf8) else {
-            return ""
+            return nil
         }
         return secret
     }
