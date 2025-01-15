@@ -89,7 +89,8 @@ class CogniteAPI {
         print("Starting authentication process...")
         
         // Check if accessToken exists and is still valid
-        if let expiry = tokenExpiryDate, let _ = accessToken, Date() < expiry {
+        let safetyMargin: TimeInterval = 300 // 5 minutes
+        if let expiry = tokenExpiryDate, let _ = accessToken, Date().addingTimeInterval(safetyMargin) < expiry {
             print("Existing access token is still valid.")
             completion(true, nil)
             return
