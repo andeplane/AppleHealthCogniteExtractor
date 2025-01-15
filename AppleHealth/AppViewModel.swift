@@ -320,9 +320,20 @@ class AppViewModel: ObservableObject {
         await fetchAllHealthData(startDate: startDate, endDate: endDate)
         
         // Check for errors
+        // Check for errors with retry logic
         if let error = fetchError {
             print("Background sync fetch error: \(error.localizedDescription)")
-            return
+            // Retry up to 3 times with exponential backoff
+            for attempt in 1...3 {
+                try? await Task.sleep(nanoseconds: UInt64(pow(2.0, Double(attempt))) * 1_000_000_000)
+                await fetchAllHealthData(startDate: startDate, endDate: endDate)
+                if fetchError == nil {
+                    break
+                }
+            }
+            if fetchError != nil {
+                return
+            }
         }
         
         // Upload the data
