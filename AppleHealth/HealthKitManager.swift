@@ -96,7 +96,16 @@ class HealthKitManager {
             throw NSError(domain: "HealthKitManager", code: 1, userInfo: [NSLocalizedDescriptionKey: "Heart Rate Type is unavailable."])
         }
         
-        return try await fetchQuantitySamples(ofType: heartRateType, startDate: startDate, endDate: endDate)
+        let samples = try await fetchQuantitySamples(ofType: heartRateType, startDate: startDate, endDate: endDate)
+        // Validate samples before returning
+        return samples.filter { sample in
+            guard sample.quantity.doubleValue(for: HKUnit(from: "count/min")) > 0,
+                  sample.startDate < sample.endDate else {
+                print("Invalid heart rate sample detected and filtered out")
+                return false
+            }
+            return true
+        }
     }
     
     /// Fetches all heart rate variability data within a specified date range.
