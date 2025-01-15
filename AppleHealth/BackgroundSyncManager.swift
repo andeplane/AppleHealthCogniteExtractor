@@ -23,12 +23,14 @@ class BackgroundSyncManager {
     func scheduleSync() {
         print("Scheduling sync task...")
 
-        let request = BGAppRefreshTaskRequest(identifier: "com.cognite.sync")
-//        request.earliestBeginDate = Date(timeIntervalSinceNow: 3 * 60 * 60) // 3 hours
-        // Run every minute now
-        request.earliestBeginDate = Date(timeIntervalSinceNow: 60 * 60)
-        
         do {
+            try BGTaskScheduler.shared.submit(request)
+            print("Background sync scheduled to run in 60 minutes.")
+            NotificationCenter.default.post(name: .backgroundSyncScheduled, object: nil)
+        } catch {
+            print("Could not schedule background sync: \(error.localizedDescription)")
+            NotificationCenter.default.post(name: .backgroundSyncFailed, object: error)
+        }
             try BGTaskScheduler.shared.submit(request)
             print("Background sync scheduled to run in 60 minutes.")
             DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
